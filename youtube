@@ -1,0 +1,27 @@
+#!/bin/bash
+
+yorn='y'
+
+while [ "${yorn}" = 'y' ]
+do
+    echo 'video (mp4) or audio (mp3)'
+    read -p 'v or a> ' format
+    echo 'what url?'
+    read -p 'paste url here (ctrl shift v)> ' url
+    echo where do you want it?
+    read -p 'directory> ' place
+    cd $place
+    if [ "${format}" = 'a' ]
+    then
+        youtube-dl -x --audio-format "mp3" -o '%(title)s.%(ext)s' $url
+    else
+        youtube-dl -f mp4 -o '%(title)s.%(ext)s' $url
+    fi
+    echo 'done, do you have more?'
+    read -p 'y or n> ' yorn
+done
+
+echo 'have a nice day :)'
+exit
+
+
