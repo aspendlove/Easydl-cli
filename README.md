@@ -3,6 +3,8 @@ This is a wrapper for youtube-dl (https://github.com/rg3/youtube-dl), a program 
 To install open the terminal in the downloaded folder and execute install.sh in a terminal (./install.sh).
 you will need to be on a system with apt or you can independently install youtube-dl and ffmpeg.
 
+To update you need to download the source code again and run install.sh. It will overwrite the previous version. I will look into more intuitive methods of updating and possibly some bianaries in the future.
+
 To use type "youtube" into the terminal and follow the prompts. Some notes are...
   1. on the prompt "where do you want it" you need to format your answer if you were using "cd" for example if you wanted your       music folder it would something like Music/ (I just have it running cd then the string you input)
   
