@@ -1,27 +1,50 @@
 #!/bin/bash
 
-yorn='y'
+YORN='y'
+LINKS=0
 
-while [ "${yorn}" = 'y' ]
+while [ "${YORN}" = 'y' ]
 do
     echo 'video (mp4) or audio (mp3)'
-    read -p 'v or a> ' format
+    read -p 'video or audio> ' format
     echo 'what url?'
     read -p 'paste url here (ctrl shift v)> ' url
-    echo where do you want it?
-    read -p 'directory> ' place
-    cd $place
-    if [ "${format}" = 'a' ]
+    if [ $LINKS -gt 0 ]
+    then
+        echo 'same directory as before?'
+        read -p 'y or n> ' yesorno
+        if [ "${yesorno}" = 'n' ]
+        then
+            echo 'where do you want it?'
+            read -p 'directory> ' place
+            cd ~
+            cd $place
+        fi
+    elif [ $LINKS -eq 0 ]
+    then
+        echo 'where do you want it?'
+        read -p 'directory> ' place
+        cd ~
+        cd $place
+    fi
+    echo ''
+    echo 'Downloading '$url' as a(n) '$format' file in ~/'$place
+    echo ''
+    sleep 2
+    if [ "${format}" = 'audio' ]
     then
         youtube-dl -x --audio-format "mp3" -o '%(title)s.%(ext)s' $url
     else
         youtube-dl -f mp4 -o '%(title)s.%(ext)s' $url
     fi
     echo 'done, do you have more?'
-    read -p 'y or n> ' yorn
+    read -p 'y or n> ' YORN
+    if [ "${YORN}" = 'y' ]
+    then
+        ((LINKS=LINKS+1))
+    fi
 done
 
 echo 'have a nice day :)'
 exit
-
 
