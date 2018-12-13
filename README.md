@@ -6,6 +6,6 @@ you will need to be on a system with apt or you can independently install youtub
 To use type "youtube" into the terminal and follow the prompts. Some notes are...
   1. on the prompt "where do you want it" you need to format your answer if you were using "cd" for example if you wanted your       music folder it would something like Music/ (I just have it running cd then the string you input)
   
-  2. on the prompt url you can input youtube video and playlist urls
+  2. on the prompt url you can input youtube video and playlist urls as well as the many other platforms supported by youtube-dl
   
 You can edit the youtube script in /usr/local/bin to change the youtube-dl commands.
