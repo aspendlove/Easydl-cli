@@ -1,4 +1,4 @@
-This is a wrapper for youtube-dl (https://github.com/rg3/youtube-dl), a program to download youtube videos in linux. I have built this wrapper with ubuntu in mind and have only tested it on ubuntu based systems. It may work in other linux distos but don't take my word on it. This wrapper has options to install mp3 and mp4 files although through editing the youtube-dl commands in the youtube.sh script you can change the parameters and file formats.
+This is a wrapper for youtube-dl (https://github.com/rg3/youtube-dl), a program to download youtube videos in linux. I have built this wrapper with ubuntu in mind and have only tested it on ubuntu based systems. It may work in other linux distos but don't take my word on it. This wrapper has options to install mp3 and mp4 files although through editing the youtube-dl commands in the easydl script you can change the parameters and file formats.
 
 To install all you have to do is download the deb file in releases and run it.
 
