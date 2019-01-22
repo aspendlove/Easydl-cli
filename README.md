@@ -5,7 +5,7 @@ To install all you have to do is download the deb file in releases and run it.
 To install from source download this repository and find the files easydl and install.sh. You will need to make them executable, in most distros you can do this by right clicking, going into properties, and finding an option that says something to the effect of "make executable". Once that is done open the terminal in the downloaded folder and execute install.sh in a terminal (./install.sh).
 you will need to be on a system with apt or you can independently install youtube-dl and ffmpeg.
 
-To update you either need to either go through the steps to install the new version of the source code or if you used the .deb file you can just download the new version and install the new deb.
+To update you either need to either go through the steps to install the new version of the source code or if you used the .deb file you can just download the new version and install the new deb. If you installed from source and come across some problems with youtube-dl you probably need to upgrade it using the command 'pip3 install --upgrade youtube-dl'
 
 To use type "easydl" into the terminal and follow the prompts. Some notes are...
   1. on the prompt "where do you want it" you need to format your answer if you were using "cd" for example if you wanted your       music folder it would something like Music/ (I just have it running cd then the string you input)
