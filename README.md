@@ -14,4 +14,4 @@ To use type "easydl" into the terminal and follow the prompts. Some notes are...
   
   2. on the prompt url you can input youtube video and playlist urls as well as the many other platforms supported by youtube-dl
   
-You can edit the youtube script in /usr/bin/ (.deb) or /usr/local/bin/ (source) to change the youtube-dl commands. (future releases will only have one install directory)
+You can edit the youtube script in /usr/bin/ (.deb) or /usr/local/bin/ (source) to change the youtube-dl commands. I will have them highlighted by a bunch of comments so you can find them in the code.
