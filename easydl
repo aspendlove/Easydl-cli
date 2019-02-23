@@ -134,11 +134,22 @@ else
         echo 'Downloading '$url' as a(n) '$format' file in ~/'$realplace
         echo ''
         sleep 2
+        #this is where
+        #you can
+        #change the Youtube Commands!
+        #
+        #
+        #
         if [ "${format}" = 'audio' ]
         then
+            #right here for audio
             youtube-dl -x --audio-format "mp3" -o '%(title)s.%(ext)s' $url
-        else
+        elif [ "${format}" = 'video' ]
+        then
+            #and right here for video
             youtube-dl -f mp4 -o '%(title)s.%(ext)s' $url
+        else
+            echo 'that is not understood, please type video or audio only'
         fi
         echo 'done, do you have more?'
         read -p 'y or n> ' YORN
