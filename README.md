@@ -13,6 +13,10 @@ To use type "easydl" into the terminal and follow the prompts. Some notes are...
 ALL COMMAND ARGUMENTS
 
 "easydl" downloads youtube videos and songs
+
 "easydl -a" adds an alias
+
 "easydl -al" opens nano so you can view and change your aliases
+
+"easydl -y" opens nano so you can change the youtube-dl commands
 
