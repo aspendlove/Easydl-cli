@@ -1,25 +1,4 @@
 #!/bin/bash
-#create config files
-cd ~
-mkdir -p ~/.config/easydl/
-cd ~/.config/easydl/
-if [ ! -f config.sh ]
-then
-    touch config.sh
-    echo '#!/bin/bash' > config.sh
-    echo "name1='nothing'" >> config.sh
-    echo "directory1='nothing'" >> config.sh
-    echo "name2='nothing'" >> config.sh
-    echo "directory2='nothing'" >> config.sh
-    echo "name3='nothing'" >> config.sh
-    echo "directory3='nothing'" >> config.sh
-    echo "name4='nothing'" >> config.sh
-    echo "directory4='nothing'" >> config.sh
-    echo "name5='nothing'" >> config.sh
-    echo "directory5='nothing'" >> config.sh
-fi
-
-
 #set beggining variables
 #set yes or no to yes so that it will default to thinking you want to download something
 YORN='y'
@@ -29,8 +8,8 @@ LINKS=0
 if [ "$1" = '-a' ]
 then
     cd ~/.config/easydl/
-    lines=$(wc -l config.sh)
-    lines=${lines/config.sh/}
+    lines=$(wc -l aliases.sh)
+    lines=${lines/aliases.sh/}
     if [ $lines -gt 1 ]
     then
         numberofaliases=$(( 1 + ( $lines - 10 ) / 2 ))
@@ -39,14 +18,19 @@ then
     fi
     read -p 'what do you want this alias to be named? (no spaces)> ' name
     read -p 'where do you want it to point? use the same syntax as if you were passing cd then this text from the home directory-> ' adirectory
-    echo 'name'"$numberofaliases"'='"'""$name""'" >> config.sh
-    echo 'directory'"$numberofaliases"'='"'""$adirectory""'" >> config.sh
+    echo 'name'"$numberofaliases"'='"'""$name""'" >> aliases.sh
+    echo 'directory'"$numberofaliases"'='"'""$adirectory""'" >> aliases.sh
 elif [ "$1" = '-al' ]
 then
     echo "your aliases are listed after all of the things being listed as nothing"
     echo "ctrl x to exit nano (the text editor)"
     sleep 5
-    nano ~/.config/easydl/config.sh
+    nano ~/.config/easydl/aliases.sh
+elif [ "$1" = '-y' ]
+then
+	echo "opening nano so you can edit the youtube commands"
+	sleep 4
+	nano ~/.config/easydl/youtube_commands.sh
 else
     while [ "${YORN}" = 'y' ]
     do
@@ -62,7 +46,7 @@ else
             then
                 echo 'where do you want it?'
                 read -p 'directory> ' place
-                source ~/.config/easydl/config.sh
+                source ~/.config/easydl/aliases.sh
                 if [ "${place}" = "$name1" ]
                 then
                     realplace="$directory1"
@@ -98,7 +82,7 @@ else
         then
             echo 'where do you want it?'
             read -p 'directory> ' place
-            source ~/.config/easydl/config.sh
+            source ~/.config/easydl/aliases.sh
             if [ "${place}" = "$name1" ]
             then
                 realplace="$directory1"
@@ -130,27 +114,26 @@ else
                 cd $place
             fi
         fi
-        echo ''
+		echo ""
+		echo ""
         echo 'Downloading '$url' as a(n) '$format' file in ~/'$realplace
-        echo ''
-        sleep 2
-        #this is where
-        #you can
-        #change the Youtube Commands!
-        #
-        #
-        #
+        sleep 5
+	clear
+		source ~/.config/easydl/youtube_commands.sh
         if [ "${format}" = 'audio' ]
         then
             #right here for audio
-            youtube-dl -x --audio-format "mp3" -o '%(title)s.%(ext)s' $url
+            youtubeAUDIO $url
         elif [ "${format}" = 'video' ]
         then
             #and right here for video
-            youtube-dl -f mp4 -o '%(title)s.%(ext)s' $url
+            youtubeVIDEO $url
         else
             echo 'that is not understood, please type video or audio only'
         fi
+		sleep 5
+	echo ""
+	echo ""
         echo 'done, do you have more?'
         read -p 'y or n> ' YORN
         if [ "${YORN}" = 'y' ]
@@ -158,7 +141,7 @@ else
             ((LINKS=LINKS+1))
         fi
     done
-
+	echo ""
     echo 'have a nice day :)'
 fi
 exit
