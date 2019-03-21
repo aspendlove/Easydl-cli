@@ -1,4 +1,5 @@
 #!/bin/bash
+chmod a+x aliases.sh easydl uninstall.sh youtube_commands.sh
 echo "Do you want to install python3-pip (to install youtube-dl) via apt?"
 read -p 'yes or no> ' yorn
 if [ "${yorn}" = 'yes' ]
