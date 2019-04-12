@@ -4,54 +4,85 @@
 YORN='y'
 #make this your first url on start
 LINKS=0
-#check the condition passed (if -a it will ask for aliases
+#check the condition passed was -a
 if [ "$1" = '-a' ]
 then
+    #cd into the config folder
     cd ~/.config/easydl/
+    #chekc how many lines are in aliases.sh and assign it to the variable "lines"
     lines=$(wc -l aliases.sh)
     lines=${lines/aliases.sh/}
+    #check if the lines are greater than 1
     if [ $lines -gt 1 ]
     then
+    #set "numberofaliases" to 1 + (lines - the amount of lines prexistent) divided into two (because there are two lines for each alias)
         numberofaliases=$(( 1 + ( $lines - 10 ) / 2 ))
     else
+    #otherwise set numberofaliases to zero
         numberofaliases=0
     fi
+    #ask what you want the alias to be named and save it to the variable name
     read -p 'what do you want this alias to be named? (no spaces)> ' name
+    #ask for the actual directory the alias will point to and save it to the variable adirectory
     read -p 'where do you want it to point? use the same syntax as if you were passing cd then this text from the home directory-> ' adirectory
+    #append the name, then the number, (name1, name2) then equals, then the name input by the user, to aliases.sh
     echo 'name'"$numberofaliases"'='"'""$name""'" >> aliases.sh
+    #append the directory, then the number, (directory1, directory2), then equals, then the directory input by the user, to aliases.sh
     echo 'directory'"$numberofaliases"'='"'""$adirectory""'" >> aliases.sh
+#check if the condition passed was -al
 elif [ "$1" = '-al' ]
 then
+    #tell the user what's happening
+    echo "opening the aliases file in nano"
+    #explain the file that is opening in nano
     echo "your aliases are listed after all of the things being listed as nothing"
-    echo "ctrl x to exit nano (the text editor)"
+    #allow the user to view the text shown
     sleep 5
+    #after 5 secons open aliases.sh in nano
     nano ~/.config/easydl/aliases.sh
+#check if the condition passed is -y
 elif [ "$1" = '-y' ]
 then
+  #tell the user what's happening
 	echo "opening nano so you can edit the youtube commands"
-	sleep 4
+	sleep 5
+  #after 5 secons open youtube_commands.sh in nano so they can fine tune the youtube-dl commands
 	nano ~/.config/easydl/youtube_commands.sh
 else
+    #while the variable YORN is y, keep the program open
     while [ "${YORN}" = 'y' ]
     do
+        #ask the user if they want a video or mp3 and save it to format
         echo 'video (mp4) or audio (mp3)'
         read -p 'video or audio> ' format
+        #ask what url to download and save it as url
         echo 'what url?'
         read -p 'paste url here (ctrl shift v)> ' url
+        #if this is the second time downloading something this session, then ask if you want to use the same directory as before (the variable links keeps track of this)
         if [ $LINKS -gt 0 ]
         then
+            #ask if you want to use the same directory as the first download
             echo 'same directory as before?'
             read -p 'y or n> ' yesorno
+            #check what they said
             if [ "${yesorno}" = 'n' ]
             then
+                #if n then ask where you want it again
                 echo 'where do you want it?'
                 read -p 'directory> ' place
+                #also make sure that you check this directory against all the aliases the user created
+                #grab the variables from aliases.sh
                 source ~/.config/easydl/aliases.sh
+                #check the variable place against name1 and if they match
                 if [ "${place}" = "$name1" ]
                 then
+                    #set realplace to the actual directory for use in the summary
                     realplace="$directory1"
+                    #cd into the home directory
                     cd ~
+                    #cd into the real directory
                     cd $directory1
+                #see previous if statement for comments
                 elif [ "${place}" = "$name2" ]
                 then
                     realplace="$directory2"
@@ -73,15 +104,22 @@ else
                     cd ~
                     cd $directory5
                 else
+                #triggered if place does not match any alias
+                    #set realplace to the original place
                     realplace="$place"
+                    #cd into home
                     cd ~
+                    #cd into the user input place
                     cd $place
                 fi
             fi
+        #if this is the first time downloading something this session, then execute the following code
         elif [ $LINKS -eq 0 ]
         then
+            #ask where they want to download the file and save it to the variable place
             echo 'where do you want it?'
             read -p 'directory> ' place
+            #check it against the user defined aliases, see previous comments on aliases for details (this is a duplicate of previous code)
             source ~/.config/easydl/aliases.sh
             if [ "${place}" = "$name1" ]
             then
@@ -114,33 +152,43 @@ else
                 cd $place
             fi
         fi
+    #add some space between echos
 		echo ""
 		echo ""
+        #give the user a summary of what is about to happen (it gives them the url, the format, and the actual directory that it will be downloaded to)
         echo 'Downloading '$url' as a(n) '$format' file in ~/'$realplace
+        #wait 5 seconds to give the user time to see this text
         sleep 5
+  #clear the screen
 	clear
+    #pull functions from youtube_commands.sh
 		source ~/.config/easydl/youtube_commands.sh
+        #check which format the user defined
         if [ "${format}" = 'audio' ]
         then
-            #right here for audio
+            #execute the youtubeAUDIO function with the user defined url
             youtubeAUDIO $url
         elif [ "${format}" = 'video' ]
         then
-            #and right here for video
+            #execute the youtubeVIDEO function with the user defined url
             youtubeVIDEO $url
         else
+            #if the user put something wierd in as their format, scold them :)
             echo 'that is not understood, please type video or audio only'
         fi
-		sleep 5
+#space out terminal text
 	echo ""
 	echo ""
+        #ask if the user wants to download more stuff from youtube
         echo 'done, do you have more?'
         read -p 'y or n> ' YORN
         if [ "${YORN}" = 'y' ]
         then
+            #if yes, then update how many things they've downloaded
             ((LINKS=LINKS+1))
         fi
     done
+#send the user on their way with a nice message!
 	echo ""
     echo 'have a nice day :)'
 fi
