@@ -57,7 +57,7 @@ mkdir ~/.config/easydl/
 cp aliases.sh ~/.config/easydl/
 cp youtube_commands.sh ~/.config/easydl/
 #check if restart flag is set
-if [ restart != 1 ]
+if [ $restart != 1 ]
 then
 	#if not then tell the user that the program is installed
 	echo "fully installed"
