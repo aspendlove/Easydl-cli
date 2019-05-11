@@ -35,7 +35,7 @@ then
     #tell the user what's happening
     echo "opening the aliases file in nano"
     #explain the file that is opening in nano
-    echo "your aliases are listed after all of the things being listed as nothing"
+    echo "your aliases are listed here"
     #allow the user to view the text shown
     sleep 5
     #after 5 secons open aliases.sh in nano
