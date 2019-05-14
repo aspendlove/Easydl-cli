@@ -1,4 +1,4 @@
-**Warning: do not use this to bypass copyright law**
+**Do not use this to bypass copyright law**
 
 This is a wrapper for youtube-dl (https://github.com/rg3/youtube-dl), a program to download youtube videos in linux. I have built this wrapper to simplify the process that it takes to download youtube videos with youtube-dl. Normally the process includes using long commands with complicated arguments, so I decided to make a script that asks you questions instead. This approach may not be the fastest way to do it, but I believe it greatly simplifies the process making it easier for new linux users. I have built this with ubuntu in mind and have only tested it on ubuntu based systems. It may work in other linux distos but don't take my word on it. This wrapper has options to install mp3 and mp4 files. You can edit the youtube-dl commands run by running "easydl -y" in your terminal. This will open a file in nano and the places to change the commands are marked with comments.
 
