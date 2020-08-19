@@ -13,7 +13,7 @@ then
 	restart=1
 fi
 #give all executables executable permissions
-chmod a+x aliases.sh easydl uninstall.sh youtube_commands.sh
+chmod a+x alias.sh easydl uninstall.sh youtube_commands.sh
 #ask if you want to install python3-pip via apt
 echo "Do you want to install python3-pip (aka, pip3) via apt? This will be used to install youtube-dl later. If you don't want to install it here you can install it yourself separately"
 read -p 'yes or no> ' yorn
@@ -50,11 +50,11 @@ else
   echo 'installing easydl'
 fi
 #copy the main executable to user/local/bin/
-sudo cp "easydl" /usr/local/bin
+sudo cp easydl /usr/local/bin
 #make the config directory easydl
 mkdir ~/.config/easydl/
-#copy the files aliases.sh and youtube_commands.sh to that folder
-cp aliases.sh ~/.config/easydl/
+#copy the files alias.sh and youtube_commands.sh to that folder
+cp alias.sh ~/.config/easydl/
 cp youtube_commands.sh ~/.config/easydl/
 #check if restart flag is set
 if [ $restart != 1 ]
