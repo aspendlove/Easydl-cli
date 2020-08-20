@@ -106,7 +106,7 @@ main()
 
     '
     #pull functions from youtube_commands.sh
-    source ~/.config/easydl/youtube_commands.sh
+    source $homedir/youtube_commands.sh
     #check which format the user defined
     if [ "${format}" = 'audio' ]
     then
@@ -143,7 +143,7 @@ main()
 check_alias()
 {
   #start off with no alias found
-  foundalias=0
+  foundalias="zero"
   #reference the stored aliases in the install directory (check_alias *input*)
   source $homedir/alias.sh
   #get the text inputed by the user
@@ -159,10 +159,10 @@ check_alias()
       #if it matches then set the path to the value at the same index in the value array
       finaldir="${aliasvalues[$index]}"
       #set a flag that an alias has been found
-      foundalias=1
+      foundalias="one"
     fi
   done
-  if [ $foundalias -ne 1 ]
+  if [ "$foundalias" != "one" ]
   then
     expandPath $arg
   fi
@@ -171,21 +171,20 @@ alias_initialize()
 {
   #initialize the alias storage file
   #make sure that the current path is the install path
-  cd $homedir
+  #cd $homedir
   #create alias.sh
-  touch alias.sh
+  touch $homedir/alias.sh
   #give it executable permissions
-  chmod a+x alias.sh
+  chmod a+x $homedir/alias.sh
   #initialize the name array
-  echo "aliasnames=()" > alias.sh
+  echo "aliasnames=()" > $homedir/alias.sh
   #initialize the value array
-  echo "aliasvalues=()" >> alias.sh
+  echo "aliasvalues=()" >> $homedir/alias.sh
 }
 alias_add()
 {
   #add an alias
   #make sure that the current path is the install path
-  cd $homedir
   echo "Adding an Alias"
   echo "What would you like to name your alias"
   #get the name from the user
@@ -194,9 +193,9 @@ alias_add()
   #get the directory that name is associated with from the user
   read -p "directory > " dir
   #append the name to the name array
-  echo "aliasnames+=("$name")" >> alias.sh
+  echo "aliasnames+=("$name")" >> $homedir/alias.sh
   #append the directory to the value array
-  echo "aliasvalues+=("$dir")" >> alias.sh
+  echo "aliasvalues+=("$dir")" >> $homedir/alias.sh
   echo "All done!"
   echo "Why not give it a try :)"
 }
@@ -223,11 +222,10 @@ alias_edit()
 {
   #edit an existing alias
   #make sure you are located in the install directory
-  cd $homedir
   #reference alias.sh
-  source alias.sh
+  source $homedir/alias.sh
   #mark that no alias has been found yet
-  foundalias=0
+  foundalias="zero"
   echo "Editing an existing Alias"
   echo "What is the name of the alias you would like to edit?"
   #get the name of the alias the user would like to edit (stored in $name)
@@ -242,13 +240,13 @@ alias_edit()
     if [ "$value" = "$edit_name" ]
     then
       #if it matches then set a flag to show it has been found
-      foundalias=1
+      foundalias="one"
       #save the index that it is located at
       edit_index=$index
     fi
   done
   #if no alias has been found...
-  if [ $foundalias -ne 1 ]
+  if [ "$foundalias" != "one" ]
   then
     #tell the user that the alias with that name does not exist
     echo "Cannot find that alias, try again and make sure that you type it in exactly"
@@ -286,11 +284,10 @@ alias_change()
   newdir=$2
   edit_name=$3
   edit_index=$4
-  cd $homedir
   #reference alias.sh
-  source alias.sh
+  source $homedir/alias.sh
   #remove the old alias.sh now that it is stored in memory
-  rm alias.sh
+  rm $homedir/alias.sh
   #initialize a new alias.sh
   alias_initialize
   #loop through the values in the arrays adding the values that don't match the one that is being edited back to the new alias.sh
@@ -306,12 +303,12 @@ alias_change()
       keepname=${aliasnames[$loopindex]}
       keepdir=${aliasvalues[$loopindex]}
       #...and append them to alias.sh
-      echo "aliasnames+=("$keepname")" >> alias.sh
-      echo "aliasvalues+=("$keepdir")" >> alias.sh
+      echo "aliasnames+=("$keepname")" >> $homedir/alias.sh
+      echo "aliasvalues+=("$keepdir")" >> $homedir/alias.sh
     else
       #if the current name is the one we want to edit then append the desired new values to alias.sh
-      echo "aliasnames+=("$newname")" >> alias.sh
-      echo "aliasvalues+=("$newdir")" >> alias.sh
+      echo "aliasnames+=("$newname")" >> $homedir/alias.sh
+      echo "aliasvalues+=("$newdir")" >> $homedir/alias.sh
     fi
   done
 }
@@ -319,9 +316,8 @@ alias_remove()
 {
   #remove an alias
   #make sure we are located in the install directory
-  cd $homedir
   #reference alias.sh
-  source alias.sh
+  source $homedir/alias.sh
   echo "Removing Alias"
   echo "What is the name of the Alias you would like to remove?"
   #get the name of the alias that the user wants to remove
@@ -334,20 +330,20 @@ alias_remove()
     if [ "$value" = "$remove_name" ]
     then
       #if it matches then set a flag to show it has been found
-      foundalias=1
+      foundalias="one"
       #save the index that it is located at
       edit_index=$index
     fi
   done
   #if no alias has been found...
-  if [ $foundalias -ne 1 ]
+  if [ "$foundalias" != "one" ]
   then
     #tell the user that the alias with that name does not exist
     echo "Cannot find that alias, try again and make sure that you type it in exactly"
     exit
   fi
   #remove alias.sh since we have the arrays in memory
-  rm alias.sh
+  rm $homedir/alias.sh
   #create a new alias.sh
   alias_initialize
   #loop through all the aliases and if don't match the one we want to remove add them back to alias.sh
@@ -363,8 +359,8 @@ alias_remove()
       keepname=${aliasnames[$loopindex]}
       keepdir=${aliasvalues[$loopindex]}
       #and append them to alias.sh
-      echo "aliasnames+=("$keepname")" >> alias.sh
-      echo "aliasvalues+=("$keepdir")" >> alias.sh
+      echo "aliasnames+=("$keepname")" >> $homedir/alias.sh
+      echo "aliasvalues+=("$keepdir")" >> $homedir/alias.sh
     fi
   done
 }
@@ -372,9 +368,8 @@ alias_clear()
 {
   #erase all aliases
   #make sure we are in the install directory
-  cd $homedir
   #remove alias.sh
-  rm alias.sh
+  rm $homedir/alias.sh
   #make a new one
   alias_initialize
 }
