@@ -15,6 +15,11 @@ sh install.sh
 
 and follow the directions. When finished Easydl will be installed!
 
+### Installation Video Tutorial
+Below is a more visual explanation of the install process and basic usage.
+
+[![Watch the video](https://img.youtube.com/vi/z9ZjHHCu1M8/0.jpg)](https://youtu.be/z9ZjHHCu1M8)
+
 ## USAGE
 
 ### Aliases
