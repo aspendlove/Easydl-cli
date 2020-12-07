@@ -37,6 +37,8 @@ To use type "easydl" into the terminal and follow the prompts. Some notes are...
 
 "easydl -h" shows a help message with all the possible commands
 
+"easydl -v" opens this README in the command line (ctrl-x to exit)
+
 "easydl -a" adds an alias
 
 "easydl -d" displays the details on all of your current aliases

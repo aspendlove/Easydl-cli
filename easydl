@@ -45,6 +45,10 @@ execute_flags()
     echo '-r remove an alias'
     echo '-c clear all aliases'
     echo '-y edit the youtube-dl commands'
+    echo '-v Open the README in nano (~/.config/easydl/README.md)'
+  elif [ "$1" = '-v' ]
+  then
+    showReadme
   else
     main
   fi
@@ -387,6 +391,10 @@ expandPath()
   then
     finaldir=$x
   fi
+}
+showReadme()
+{
+  sudo nano --softwrap --view ~/.config/easydl/README.md
 }
 
 execute_flags $1
