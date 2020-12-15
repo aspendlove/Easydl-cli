@@ -394,7 +394,7 @@ expandPath()
 }
 showReadme()
 {
-  sudo nano --softwrap --view ~/.config/easydl/README.md
+  nano --softwrap --view ~/.config/easydl/README.md
 }
 
 execute_flags $1
