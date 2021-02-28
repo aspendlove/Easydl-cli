@@ -37,7 +37,7 @@ To use type "easydl" into the terminal and follow the prompts. Some notes are...
 
 "easydl -h" shows a help message with all the possible commands
 
-"easydl -v" opens this README in the command line (ctrl-x to exit)
+"easydl --readme" opens this README in the command line (ctrl-x to exit)
 
 "easydl -a" adds an alias
 
@@ -52,3 +52,5 @@ To use type "easydl" into the terminal and follow the prompts. Some notes are...
 "easydl -y" opens nano so you can change the youtube-dl commands
 
 "easydl -i" creates a new alias file, this could be useful if you accidentally deleted it and need a new one. It should not be needed in general use.
+
+"easydl --cut" opens the cutter utility

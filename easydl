@@ -1,7 +1,9 @@
 #!/bin/bash
+#make pushd silent
 pushd () {
   command pushd "$@" > /dev/null
 }
+#make popd silent
 popd () {
   command popd "$@" > /dev/null
 }
@@ -9,6 +11,11 @@ popd () {
 LINKS=0
 #set the install directory as the current directory as soon as the program starts
 homedir=~/.config/easydl/
+#Variables for coloring text
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 execute_flags()
 {
   if [ "$1" = '-i' ]
@@ -45,10 +52,14 @@ execute_flags()
     echo '-r remove an alias'
     echo '-c clear all aliases'
     echo '-y edit the youtube-dl commands'
-    echo '-v Open the README in nano (~/.config/easydl/README.md)'
-  elif [ "$1" = '-v' ]
+    echo '--readme Open the README in nano (~/.config/easydl/README.md)'
+    echo '--cut open cutter'
+  elif [ "$1" = '--readme' ]
   then
     showReadme
+  elif [ "$1" = '--cut' ]
+  then
+    cutter
   else
     main
   fi
@@ -62,13 +73,32 @@ main()
   while [ "${YORN}" = 'y' ]
   do
     #ask the user if they want a video or mp3 and save it to format
-    echo 'video (mp4) or audio (mp3)'
+    echo 'video (mp4) or audio'
     read -p 'video or audio> ' format
     echo ''
+    if [ "$format" = "audio" ]
+    then
+      echo 'what audio format would you like? ("best", "aac", "flac", "mp3", "m4a", "opus", "vorbis", or "wav" with best giving the best possible format)'
+      read -p 'audio format> ' audioFormat
+      summaryFormat="$audioFormat"
+      echo ''
+    else
+      summaryFormat="Video"
+    fi
     #ask what url to download and save it as url
     echo 'what url?'
     read -p 'paste url here (ctrl shift v)> ' url
     echo ''
+    #ask the user whether they would like to download a playlist or not
+    echo 'would you like to download a playlist?'
+    read -p 'yes or no> ' wantsPlaylist
+    echo ''
+    if [[ "$wantsPlaylist" != "yes" ]] && [[ "$wantsPlaylist" != "no" ]]
+    then
+      echo 'error: invalid answer'
+      echo 'please answer with "yes" or "no" only'
+      exit
+    fi
     #if this is the second time downloading something this session, then ask if you want to use the same directory as before (the variable links keeps track of this)
     if [ $LINKS -gt 0 ]
     then
@@ -99,11 +129,26 @@ main()
       #cd ~
       #cd "$finaldir"
     fi
+    isPlaylist=$(youtube-dl -o "%(playlist_title)s" --get-filename --playlist-items 1 "$url")
+    if [ "$isPlaylist" = "NA" ]
+    then
+      #get video title
+      downloadTitle=$(youtube-dl --get-title "$url")
+    else
+      if [ "$wantsPlaylist" = "no" ]
+      then
+        #get video title of single youtube video form playlist
+        downloadTitle=$(youtube-dl --no-playlist --get-title "$url")
+      else
+        #set video title to the url (playlist)
+        downloadTitle=$(youtube-dl -o "%(playlist_title)s" --get-filename --playlist-items 1 "$url")
+      fi
+    fi
     #add some space between echos
     echo ""
     echo ""
     #give the user a summary of what is about to happen (it gives them the url, the format, and the actual directory that it will be downloaded to)
-    echo 'Downloading '$url' as a(n) '$format' file in' $finaldir
+    echo 'Downloading "'"$downloadTitle"'" as a(n) '"$summaryFormat"' file in' "$finaldir"
     #wait 5 seconds to give the user time to see this text
     sleep 5
     echo '
@@ -112,21 +157,41 @@ main()
     #pull functions from youtube_commands.sh
     source $homedir/youtube_commands.sh
     #check which format the user defined
-    if [ "${format}" = 'audio' ]
+    if [ "$wantsPlaylist" = "no" ]
     then
-      #execute the youtubeAUDIO function with the user defined url
-      pushd $finaldir
-      youtubeAUDIO $url
-      popd
-    elif [ "${format}" = 'video' ]
-    then
-      pushd $finaldir
-      #execute the youtubeVIDEO function with the user defined url
-      youtubeVIDEO $url
-      popd
+      if [ "${format}" = 'audio' ]
+      then
+        #execute the youtubeAUDIO function with the user defined url
+        pushd "$finaldir"
+        YoutubeAudio $url $audioFormat
+        popd
+      elif [ "${format}" = 'video' ]
+      then
+        pushd "$finaldir"
+        #execute the youtubeVIDEO function with the user defined url
+        YoutubeVideo $url
+        popd
+      else
+        #if the user put something wierd in as their format, scold them :)
+        echo 'that is not understood, please type video or audio only'
+      fi
     else
-      #if the user put something wierd in as their format, scold them :)
-      echo 'that is not understood, please type video or audio only'
+      if [ "${format}" = 'audio' ]
+      then
+        #execute the youtubeAUDIO function with the user defined url
+        pushd "$finaldir"
+        YoutubeAudioPlaylist $url $audioFormat
+        popd
+      elif [ "${format}" = 'video' ]
+      then
+        pushd "$finaldir"
+        #execute the youtubeVIDEO function with the user defined url
+        YoutubeVideoPlaylist $url
+        popd
+      else
+        #if the user put something wierd in as their format, scold them :)
+        echo 'that is not understood, please type video or audio only'
+      fi
     fi
     #space out terminal text
     echo ""
@@ -161,15 +226,17 @@ check_alias()
     if [ "$name" = "$arg" ]
     then
       #if it matches then set the path to the value at the same index in the value array
-      finaldir="${aliasvalues[$index]}"
+      regularDirectory="${aliasvalues[$index]}"
       #set a flag that an alias has been found
       foundalias="one"
     fi
   done
   if [ "$foundalias" != "one" ]
   then
-    expandPath $arg
+    #expand the path $1 = value, $2 = name of output variable
+    regularDirectory="$arg"
   fi
+  expandPath "$regularDirectory" "finaldir"
 }
 alias_initialize()
 {
@@ -380,21 +447,112 @@ alias_clear()
 expandPath()
 {
   x=$1
+  local  __resultvar=$2
   case $x in
     *"~/"*)
     contains="found"
     x="${HOME}/${x#"~/"}"
-    finaldir=$x
+    local __finalx=$x
     ;;
   esac
   if [ "$contains" != "found" ]
   then
-    finaldir=$x
+    local __finalx=$x
   fi
+  eval $__resultvar="'$__finalx'"
 }
 showReadme()
 {
   nano --softwrap --view ~/.config/easydl/README.md
 }
-
+cutter()
+{
+  #initialize the arrays
+  filenames=()
+  start_times=()
+  end_times=()
+  echo -e "${CYAN}Would you like the cuts to favor speed or accuracy?${NC}"
+  read -p '"speed" or "accuracy">' pref
+  #get the path to the original file (colored cyan)
+  echo -e "${CYAN}Enter full path to orignal file (including filename and extension)${NC}"
+  read -p ">" full_path
+  echo ""
+  #get only the path to the file
+  original_path=$(dirname "$full_path")
+  #get only the filename and extension
+  original=$(basename "$full_path")
+  #get the filenames and times to cut
+  get_times
+  #perform the cut
+  cut
+}
+get_times()
+{
+  #create a variable for the raw input for the filename (able to exit)
+  sraw="initial"
+  #while the user doesn't input "done" for the filename
+  while [ "$sraw" != "done" ]
+  do
+    #ask the user for the name of the file they want to output to (needs an extension)
+    echo -e "${CYAN}Enter filename (including extension) or \"done\" to start cutting${NC}"
+    read -p "filename > " sraw
+    #make sure the user didn't input "done"
+    if [ "$sraw" != "done" ]
+    then
+      #add the filename to the filenames array
+      filenames+=("$sraw")
+    fi
+    #make sure the user didn't input "done"
+    if [ "$sraw" != "done" ]
+    then
+      #ask for starting time (with cyan base color and green for the word "start")
+      echo -e "${CYAN}Enter ${GREEN}start${CYAN} time${NC}"
+      read -p "HH:MM:SS > " raw
+      #turn the HH:MM:SS formated time to seconds (it can also accept M:SS and S)
+      start=$(echo $raw | awk -F\: '{ for(k=NF;k>0;k--) sum+=($k*(60^(NF-k))); print sum }')
+      #add the start time to the start times array
+      start_times+=("$start")
+    fi
+    if [ "$sraw" != "done" ]
+    then
+      echo -e "${CYAN}Enter ${RED}end${CYAN} time${NC}"
+      read -p "HH:MM:SS > " raw
+      #turn the HH:MM:SS formated time to seconds (it can also accept M:SS and S)
+      end=$(echo $raw | awk -F\: '{ for(k=NF;k>0;k--) sum+=($k*(60^(NF-k))); print sum }')
+      #add the end time to the end times array
+      end_times+=("$end")
+      #space out each pass
+      echo ""
+    fi
+  done
+}
+cut()
+{
+  #expand the path on the path to the original file and store the output in the original_path variable $1 = input, $2 = variable name
+  expandPath "$original_path" "original_path"
+  #move to the directory of the original file
+  pushd "$original_path"
+  #cycle through all the entries (filename, start, and end time combos)
+  for index in ${!filenames[@]}
+  do
+    #set the current "filename"
+    filename=${filenames[$index]}
+    #set the current "final_start"
+    final_start=${start_times[$index]}
+    #set the current "final_end"
+    final_end=${end_times[$index]}
+    #space out the output
+    echo ""
+    #execute the ffmpeg $original = original file name, $final_start = starting time in seconds, $final_end = ending time in seconds, $filename = filename for cut file
+    if [ $pref == "speed" ]
+    then
+      ffmpeg -hide_banner -i "$original" -ss "$final_start" -to "$final_end" -c copy "$filename"
+    else
+      ffmpeg -hide_banner -i "$original" -ss "$final_start" -to "$final_end" -async 1 "$filename"
+    fi
+  done
+  #reset directory
+  popd
+}
+#start the program by first analyzing the command line options
 execute_flags $1
