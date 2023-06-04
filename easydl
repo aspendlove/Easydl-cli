@@ -53,10 +53,10 @@ execute_flags() {
     echo '-r remove an alias'
     echo '-c clear all aliases'
     echo '-y edit the youtube-dl commands'
-    echo '--read -rme Open the read -rME in nano (~/.config/easydl/read -rME.md)'
+    echo '--readme Open the README in nano (~/.config/easydl/README.md)'
     echo '--cut open cutter'
-  elif [ "$1" = '--read -rme' ]; then
-    showread -rme
+  elif [ "$1" = '--readme' ]; then
+    showREADME
   elif [ "$1" = '--cut' ]; then
     cutter
   else
@@ -69,7 +69,7 @@ main() {
   source $homedir/alias.sh
   while [ "${YORN}" = 'y' ]; do
     echo 'video (mp4) or audio'
-    read -r -r -p 'video or audio> ' format
+    read -r -p 'video or audio> ' format
     echo ''
     if [ "$format" = "audio" ]; then
       echo 'what audio format would you like? ("best", "aac", "flac", "mp3", "m4a", "opus", "vorbis", or "wav" with best giving the best possible format)'
@@ -327,7 +327,7 @@ expandPath() {
 }
 
 showREADME() {
-  nano --softwrap --view ~/.config/easydl/read -rME.md
+  nano --softwrap --view ~/.config/easydl/README.md
 }
 
 cutter() {
