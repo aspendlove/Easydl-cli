@@ -15,7 +15,7 @@ if command -v "yt-dlp" &>/dev/null; then
 elif command -v "youtube-dl" &>/dev/null; then
   YOUTUBECOMMAND="youtube-dl"
 else
-  echo 'youtube-dl or yt-dlp is required, for more support please reference the read -rme'
+  echo 'youtube-dl or yt-dlp is required, for more support please reference the README'
   exit
 fi
 
