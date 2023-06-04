@@ -7,7 +7,7 @@ This is a wrapper for youtube-dl (https://github.com/rg3/youtube-dl), a program 
 Because of some recent issues with youtube-dl, the fork yt-dlp is prefered by easydl. Youtube-dl is used as a fallback.
 
 ## Installation
-Before installing, you need to make sure you have youtube-dl or yt-dlp installed. There are multiple ways of achieving this, but you can find either in the default repos of many distros. Otherwise there is more info on each of their github pages
+Before installing, you need to make sure you have youtube-dl or yt-dlp installed. There are multiple ways of achieving this, but you can find either in the default repos of many distros. Otherwise there is more info on each of their github pages. You will also need ffmpeg.
 
 Once you have youtube-dl, you need to go to the releases tab on this GitHub page (https://github.com/copperly123/Easydl/releases) and download the latest zip file. Once downloaded, extract the files into a directory where you want to keep it (you could delete the folder the program will still work, but you will have to redownload it to get the uninstall script). After that, open up the unzipped folder, right-click on an empty space and chose "open in terminal". Once in the terminal, enter the command
 
@@ -18,7 +18,7 @@ sh install.sh
 and follow the directions. When finished, Easydl will be installed!
 
 ### Installation Video Tutorial
-Below is a more visual explanation of the installation process and basic usage.
+Below is a more visual explanation of the installation process and basic usage. It requires previous installation of yt-dlp or youtube-dl, as well as ffmpeg. The installer no longer provides the option to install youtube-dl, and the installer will contain no prompts.
 
 [![Watch the video](https://img.youtube.com/vi/z9ZjHHCu1M8/0.jpg)](https://youtu.be/z9ZjHHCu1M8)
 
