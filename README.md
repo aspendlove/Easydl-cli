@@ -3,13 +3,15 @@
 ## Easydl
 This is a wrapper for youtube-dl (https://github.com/rg3/youtube-dl), a program to download videos from YouTube and many other sites in Linux (https://ytdl-org.github.io/youtube-dl/supportedsites.html). I have built this wrapper to simplify the process of downloading videos with youtube-dl. Typically, the process includes using long commands with complicated arguments, so I decided to make a script that asks you questions instead. This approach may not be the fastest way to do it, but I believe it greatly simplifies the process, making it easier for new Linux users. This utility should work on any Linux distro as long as you have youtube-dl installed. By default, this wrapper has options to install mp3 and mp4 files. You can edit the youtube-dl commands to change these and other options by running "easydl -y" in your terminal. This will open a file in nano, and the places to change the commands are marked with comments.
 
-## Installation
-Before installing, you need to make sure you have youtube-dl installed. There are multiple ways of achieving this, but you can find it in the default repos of many distros. Youtube-dl also has their own set of universal instructions on https://ytdl-org.github.io/youtube-dl/download.html. If you're on Ubuntu the installer can install youtube-dl for you, you just need to answer yes to installing python-pip3 and youtube-dl
+## Youtube-dl vs yt-dlp
+Because of some recent issues with youtube-dl, the fork yt-dlp is prefered by easydl. Youtube-dl is used as a fallback.
 
-Once you have youtube-dl, you need to go to the releases tab on this GitHub page (https://github.com/copperly123/Easydl/releases) and download the latest zip file. Once downloaded, extract the files into a directory where you want to keep it (you could delete the folder and the program will still work, but you will have to redownload it to get the uninstall script). After that, open up the unzipped folder, right-click on an empty space and chose "open in terminal". Once in the terminal, type these commands
+## Installation
+Before installing, you need to make sure you have youtube-dl or yt-dlp installed. There are multiple ways of achieving this, but you can find either in the default repos of many distros. Otherwise there is more info on each of their github pages
+
+Once you have youtube-dl, you need to go to the releases tab on this GitHub page (https://github.com/copperly123/Easydl/releases) and download the latest zip file. Once downloaded, extract the files into a directory where you want to keep it (you could delete the folder the program will still work, but you will have to redownload it to get the uninstall script). After that, open up the unzipped folder, right-click on an empty space and chose "open in terminal". Once in the terminal, enter the command
 
 ```
-chmod a+x install.sh
 sh install.sh
 ```
 

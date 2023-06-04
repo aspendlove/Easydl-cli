@@ -1,13 +1,24 @@
 #!/bin/bash
 #make pushd silent
-pushd () {
-  command pushd "$@" > /dev/null
+pushd() {
+  command pushd "$@" >/dev/null
 }
 #make popd silent
-popd () {
-  command popd "$@" > /dev/null
+popd() {
+  command popd "$@" >/dev/null
 }
-#Set the flag for the first link
+
+YOUTUBECOMMAND=""
+
+if command -v "yt-dlp" &>/dev/null; then
+  YOUTUBECOMMAND="yt-dlp"
+elif command -v "youtube-dl" &>/dev/null; then
+  YOUTUBECOMMAND="youtube-dl"
+else
+  echo 'youtube-dl or yt-dlp is required, for more support please reference the read -rme'
+  exit
+fi
+
 LINKS=0
 #set the install directory as the current directory as soon as the program starts
 homedir=~/.config/easydl/
@@ -16,35 +27,25 @@ CYAN='\033[0;36m'
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
-execute_flags()
-{
-  if [ "$1" = '-i' ]
-  then
+
+execute_flags() {
+  if [ "$1" = '-i' ]; then
     alias_initialize
-  elif [ "$1" = '-a' ]
-  then
+  elif [ "$1" = '-a' ]; then
     alias_add
-  elif [ "$1" = '-d' ]
-  then
+  elif [ "$1" = '-d' ]; then
     alias_display
-  elif [ "$1" = '-e' ]
-  then
+  elif [ "$1" = '-e' ]; then
     alias_edit
-  elif [ "$1" = '-r' ]
-  then
+  elif [ "$1" = '-r' ]; then
     alias_remove
-  elif [ "$1" = '-c' ]
-  then
+  elif [ "$1" = '-c' ]; then
     alias_clear
-  elif [ "$1" = '-y' ]
-  then
-    #tell the user what's happening
-  	echo "opening nano so you can edit the youtube commands"
-  	sleep 3
-    #after 5 secons open youtube_commands.sh in nano so they can fine tune the youtube-dl commands
-  	nano ~/.config/easydl/youtube_commands.sh
-  elif [ "$1" = '-h' ]
-  then
+  elif [ "$1" = '-y' ]; then
+    echo "opening nano so you can edit the youtube commands"
+    sleep 3
+    nano ~/.config/easydl/youtube_commands.sh
+  elif [ "$1" = '-h' ]; then
     echo '-i initliazes the alias.sh file to allow alias creation. Will delete previous aliases if present'
     echo '-a add a new alias'
     echo '-d display all of your aliases'
@@ -52,500 +53,331 @@ execute_flags()
     echo '-r remove an alias'
     echo '-c clear all aliases'
     echo '-y edit the youtube-dl commands'
-    echo '--readme Open the README in nano (~/.config/easydl/README.md)'
+    echo '--read -rme Open the read -rME in nano (~/.config/easydl/read -rME.md)'
     echo '--cut open cutter'
-  elif [ "$1" = '--readme' ]
-  then
-    showReadme
-  elif [ "$1" = '--cut' ]
-  then
+  elif [ "$1" = '--read -rme' ]; then
+    showread -rme
+  elif [ "$1" = '--cut' ]; then
     cutter
   else
     main
   fi
 }
-main()
-{
-  #set yes or no to yes so that it will default to thinking you want to download something
+
+main() {
   YORN='y'
   source $homedir/alias.sh
-  #while the variable YORN is y, keep the program open
-  while [ "${YORN}" = 'y' ]
-  do
-    #ask the user if they want a video or mp3 and save it to format
+  while [ "${YORN}" = 'y' ]; do
     echo 'video (mp4) or audio'
-    read -p 'video or audio> ' format
+    read -r -r -p 'video or audio> ' format
     echo ''
-    if [ "$format" = "audio" ]
-    then
+    if [ "$format" = "audio" ]; then
       echo 'what audio format would you like? ("best", "aac", "flac", "mp3", "m4a", "opus", "vorbis", or "wav" with best giving the best possible format)'
-      read -p 'audio format> ' audioFormat
+      read -r -p 'audio format> ' audioFormat
       summaryFormat="$audioFormat"
       echo ''
     else
       summaryFormat="Video"
     fi
-    #ask what url to download and save it as url
     echo 'what url?'
-    read -p 'paste url here (ctrl shift v)> ' url
+    read -r -p 'paste url here (ctrl shift v)> ' url
     echo ''
-    #ask the user whether they would like to download a playlist or not
     echo 'would you like to download a playlist?'
-    read -p 'yes or no> ' wantsPlaylist
+    read -r -p 'yes or no> ' wantsPlaylist
     echo ''
-    if [[ "$wantsPlaylist" != "yes" ]] && [[ "$wantsPlaylist" != "no" ]]
-    then
+    if [[ "$wantsPlaylist" != "yes" ]] && [[ "$wantsPlaylist" != "no" ]]; then
       echo 'error: invalid answer'
       echo 'please answer with "yes" or "no" only'
       exit
     fi
-    #if this is the second time downloading something this session, then ask if you want to use the same directory as before (the variable links keeps track of this)
-    if [ $LINKS -gt 0 ]
-    then
-      #ask if you want to use the same directory as the first download
+    if [ $LINKS -gt 0 ]; then
       echo 'same directory as before?'
-      read -p 'y or n> ' yesorno
+      read -r -p 'y or n> ' yesorno
       echo ''
-      #check what they said
-      if [ "${yesorno}" = 'n' ]
-      then
-        #if n then ask where you want it again
+      if [ "${yesorno}" = 'n' ]; then
         echo 'where do you want it? ex ~/Videos/ or /media/'
-        read -p 'directory> ' down_dir
+        read -r -p 'directory> ' down_dir
         echo ''
-        #also make sure that you check this directory against all the aliases the user created
-        check_alias $down_dir
-        #cd ~
-        #cd "$finaldir"
+        check_alias "$down_dir"
       fi
-    #if this is the first time downloading something this session, then execute the following code
-    elif [ $LINKS -eq 0 ]
-    then
-      #ask where they want to download the file and save it to the variable place
+    elif [ $LINKS -eq 0 ]; then
       echo 'where do you want it? ex ~/Videos/ or /media/'
-      read -p 'directory> ' down_dir
+      read -r -p 'directory> ' down_dir
       echo ''
-      check_alias $down_dir
-      #cd ~
-      #cd "$finaldir"
+      check_alias "$down_dir"
     fi
-    isPlaylist=$(youtube-dl -o "%(playlist_title)s" --get-filename --playlist-items 1 "$url")
-    if [ "$isPlaylist" = "NA" ]
-    then
+    isPlaylist=$($YOUTUBECOMMAND -o "%(playlist_title)s" --get-filename --playlist-items 1 "$url")
+    if [ "$isPlaylist" = "NA" ]; then # link is not a playlist
       #get video title
-      downloadTitle=$(youtube-dl --get-title "$url")
+      downloadTitle=$($YOUTUBECOMMAND --get-title "$url")
     else
-      if [ "$wantsPlaylist" = "no" ]
-      then
+      if [ "$wantsPlaylist" = "no" ]; then
         #get video title of single youtube video form playlist
-        downloadTitle=$(youtube-dl --no-playlist --get-title "$url")
+        downloadTitle=$($YOUTUBECOMMAND --no-playlist --get-title "$url")
       else
         #set video title to the url (playlist)
-        downloadTitle=$(youtube-dl -o "%(playlist_title)s" --get-filename --playlist-items 1 "$url")
+        downloadTitle=$($YOUTUBECOMMAND -o "%(playlist_title)s" --get-filename --playlist-items 1 "$url")
       fi
     fi
-    #add some space between echos
-    echo ""
-    echo ""
+    echo '
+    
+    '
     #give the user a summary of what is about to happen (it gives them the url, the format, and the actual directory that it will be downloaded to)
     echo 'Downloading "'"$downloadTitle"'" as a(n) '"$summaryFormat"' file in' "$finaldir"
-    #wait 5 seconds to give the user time to see this text
     sleep 5
     echo '
 
     '
-    #pull functions from youtube_commands.sh
+
     source $homedir/youtube_commands.sh
     #check which format the user defined
-    if [ "$wantsPlaylist" = "no" ]
-    then
-      if [ "${format}" = 'audio' ]
-      then
-        #execute the youtubeAUDIO function with the user defined url
+    if [ "$wantsPlaylist" = "no" ]; then
+      if [ "${format}" = 'audio' ]; then
         pushd "$finaldir"
         YoutubeAudio $url $audioFormat
         popd
-      elif [ "${format}" = 'video' ]
-      then
+      elif [ "${format}" = 'video' ]; then
         pushd "$finaldir"
-        #execute the youtubeVIDEO function with the user defined url
         YoutubeVideo $url
         popd
       else
-        #if the user put something wierd in as their format, scold them :)
         echo 'that is not understood, please type video or audio only'
       fi
     else
-      if [ "${format}" = 'audio' ]
-      then
-        #execute the youtubeAUDIO function with the user defined url
+      if [ "${format}" = 'audio' ]; then
         pushd "$finaldir"
         YoutubeAudioPlaylist $url $audioFormat
         popd
-      elif [ "${format}" = 'video' ]
-      then
+      elif [ "${format}" = 'video' ]; then
         pushd "$finaldir"
-        #execute the youtubeVIDEO function with the user defined url
         YoutubeVideoPlaylist $url
         popd
       else
-        #if the user put something wierd in as their format, scold them :)
         echo 'that is not understood, please type video or audio only'
       fi
     fi
-    #space out terminal text
-    echo ""
-    echo ""
-    #ask if the user wants to download more stuff from youtube
+
+    echo '
+    
+    '
     echo 'done, do you have more?'
-    read -p 'y or n> ' YORN
-    if [ "${YORN}" = 'y' ]
-    then
-      #if yes, then update how many things they've downloaded
-      ((LINKS=LINKS+1))
+    read -r -p 'y or n> ' YORN
+    if [ "${YORN}" = 'y' ]; then
+      ((LINKS = LINKS + 1))
     fi
   done
-  #send the user on their way with a nice message!
   echo ""
   echo 'have a nice day :)'
 }
-check_alias()
-{
-  #start off with no alias found
-  foundalias="zero"
-  #reference the stored aliases in the install directory (check_alias *input*)
+
+check_alias() {
+  foundalias="false"
   source $homedir/alias.sh
-  #get the text inputed by the user
   arg=$1
-  #loop through all the indices in the name array
-  for index in ${!aliasnames[@]}
-  do
-    #set the name to be checked to the value at the current index in the name array
+  for index in "${!aliasnames[@]}"; do
     name=${aliasnames[$index]}
-    #check if the name to be checked is equal to the text inputed by the user
-    if [ "$name" = "$arg" ]
-    then
-      #if it matches then set the path to the value at the same index in the value array
+    if [ "$name" = "$arg" ]; then
       regularDirectory="${aliasvalues[$index]}"
-      #set a flag that an alias has been found
-      foundalias="one"
+      foundalias="true"
     fi
   done
-  if [ "$foundalias" != "one" ]
-  then
-    #expand the path $1 = value, $2 = name of output variable
+  if [ "$foundalias" != "true" ]; then
     regularDirectory="$arg"
   fi
+  # finaldir is the name of the output variable
   expandPath "$regularDirectory" "finaldir"
 }
-alias_initialize()
-{
-  #initialize the alias storage file
-  #make sure that the current path is the install path
-  #cd $homedir
-  #create alias.sh
+
+alias_initialize() {
   touch $homedir/alias.sh
-  #give it executable permissions
   chmod a+x $homedir/alias.sh
-  #initialize the name array
-  echo "aliasnames=()" > $homedir/alias.sh
-  #initialize the value array
-  echo "aliasvalues=()" >> $homedir/alias.sh
+  echo "aliasnames=()" >$homedir/alias.sh
+  echo "aliasvalues=()" >>$homedir/alias.sh
 }
-alias_add()
-{
-  #add an alias
-  #make sure that the current path is the install path
+
+alias_add() {
   echo "Adding an Alias"
   echo "What would you like to name your alias"
-  #get the name from the user
-  read -p "name > " name
+  read -r -p "name > " name
   echo "And where would you like the actual directory to be located ex. ~/Videos/Movies/"
-  #get the directory that name is associated with from the user
-  read -p "directory > " dir
+  read -r -p "directory > " dir
   #append the name to the name array
-  echo "aliasnames+=("$name")" >> $homedir/alias.sh
+  echo "aliasnames+=("$name")" >>$homedir/alias.sh
   #append the directory to the value array
-  echo "aliasvalues+=("$dir")" >> $homedir/alias.sh
+  echo "aliasvalues+=("$dir")" >>$homedir/alias.sh
   echo "All done!"
   echo "Why not give it a try :)"
 }
-alias_display()
-{
-  #display all aliases and their values
-  #reference alias.sh
+alias_display() {
   source $homedir/alias.sh
-  #loop through the aliases and echo each pair
-  for index in ${!aliasnames[@]}
-  do
-    #echo the prefix name and don't create a newline
+  for index in "${!aliasnames[@]}"; do
     echo -e "Name: \c"
-    #print the name at the current index
     echo ${aliasnames[$index]}
-    #echo the prefix Directory and don't create a newline
     echo -e "Directory: \c"
-    #print the directory at the current index
     echo ${aliasvalues[$index]}
     echo ''
   done
 }
-alias_edit()
-{
-  #edit an existing alias
-  #make sure you are located in the install directory
-  #reference alias.sh
+
+alias_edit() {
   source $homedir/alias.sh
-  #mark that no alias has been found yet
-  foundalias="zero"
+  foundalias="false"
   echo "Editing an existing Alias"
   echo "What is the name of the alias you would like to edit?"
-  #get the name of the alias the user would like to edit (stored in $name)
-  read -p "name > " edit_name
-  #make sure that alias exists
-  #loop through all of the alias names to make sure that the alias exists
-  for index in ${!aliasnames[@]}
-  do
-    #get the value at each index
+  read -r -p "name > " edit_name
+  for index in "${!aliasnames[@]}"; do
     value=${aliasnames[$index]}
-    #check if the value is equal to the text inputed by the user
-    if [ "$value" = "$edit_name" ]
-    then
-      #if it matches then set a flag to show it has been found
-      foundalias="one"
-      #save the index that it is located at
+    if [ "$value" = "$edit_name" ]; then
+      foundalias="true"
       edit_index=$index
     fi
   done
-  #if no alias has been found...
-  if [ "$foundalias" != "one" ]
-  then
-    #tell the user that the alias with that name does not exist
+  if [ "$foundalias" != "true" ]; then
     echo "Cannot find that alias, try again and make sure that you type it in exactly"
     exit
   fi
-  #start to edit that alias
   echo "What would you like to change the NAME to (enter '"'skip'"' to skip)"
-  read -p "Name > " Name_ans
-  if [ "$Name_ans" != "skip" ]
-  then
-    #if the user inputed anything but "skip" then save the name that the user answered
+  read -r -p "Name > " Name_ans
+  if [ "$Name_ans" != "skip" ]; then
     newname=$Name_ans
   else
-    #if the user inputed "skip" then save the name that it already has
     newname=${aliasnames[$edit_index]}
   fi
   echo "What would you like to change the DIRECTORY to (enter '"'skip'"' to skip)"
-  read -p "Directory > " Dir_ans
-  if [ "$Dir_ans" != "skip" ]
-  then
-    #if the user inputed anything but "skip" then save the directory that the user answered
+  read -r -p "Directory > " Dir_ans
+  if [ "$Dir_ans" != "skip" ]; then
     newdir=$Dir_ans
   else
-    #if the user inputed "skip" then save the directory that it already has
     newdir=${aliasvalues[$edit_index]}
   fi
-  #call alias change with the desired name, directory, and the index that they can be found at
   alias_change $newname $newdir $edit_name $edit_index
 }
-alias_change()
-{
-  #actually change the alias file, part of alias_edit
-  #grab the variables that were passed as arguments
+
+alias_change() {
   newname=$1
   newdir=$2
   edit_name=$3
   edit_index=$4
-  #reference alias.sh
   source $homedir/alias.sh
-  #remove the old alias.sh now that it is stored in memory
   rm $homedir/alias.sh
-  #initialize a new alias.sh
   alias_initialize
-  #loop through the values in the arrays adding the values that don't match the one that is being edited back to the new alias.sh
-  #when you reach the one that will be edited append the new values to alias.sh instead of the old values
-  for loopindex in ${!aliasnames[@]}
-  do
-    #set the name that will be checked against to the value in aliasnames at the current index
+  for loopindex in "${!aliasnames[@]}"; do
     currentname=${aliasnames[$loopindex]}
-    #if the name currently being checked is not the one we want to edit...
-    if [ "$currentname" != "$edit_name" ]
-    then
-      #grab the unchanged values...
+    if [ "$currentname" != "$edit_name" ]; then
       keepname=${aliasnames[$loopindex]}
       keepdir=${aliasvalues[$loopindex]}
-      #...and append them to alias.sh
-      echo "aliasnames+=("$keepname")" >> $homedir/alias.sh
-      echo "aliasvalues+=("$keepdir")" >> $homedir/alias.sh
+      echo "aliasnames+=("$keepname")" >>$homedir/alias.sh
+      echo "aliasvalues+=("$keepdir")" >>$homedir/alias.sh
     else
-      #if the current name is the one we want to edit then append the desired new values to alias.sh
-      echo "aliasnames+=("$newname")" >> $homedir/alias.sh
-      echo "aliasvalues+=("$newdir")" >> $homedir/alias.sh
+      echo "aliasnames+=("$newname")" >>$homedir/alias.sh
+      echo "aliasvalues+=("$newdir")" >>$homedir/alias.sh
     fi
   done
 }
-alias_remove()
-{
-  #remove an alias
-  #make sure we are located in the install directory
-  #reference alias.sh
+
+alias_remove() {
   source $homedir/alias.sh
+  foundalias="false"
   echo "Removing Alias"
   echo "What is the name of the Alias you would like to remove?"
-  #get the name of the alias that the user wants to remove
-  read -p "Name > " remove_name
-  #check that it is an actual alias name
-  for index in ${!aliasnames[@]}
-  do
+  read -r -p "Name > " remove_name
+  for index in "${!aliasnames[@]}"; do
     value=${aliasnames[$index]}
-    #check if the value is equal to the text inputed by the user
-    if [ "$value" = "$remove_name" ]
-    then
-      #if it matches then set a flag to show it has been found
-      foundalias="one"
-      #save the index that it is located at
+    if [ "$value" = "$remove_name" ]; then
+      foundalias="true"
       edit_index=$index
     fi
   done
-  #if no alias has been found...
-  if [ "$foundalias" != "one" ]
-  then
-    #tell the user that the alias with that name does not exist
+  if [ "$foundalias" != "true" ]; then
     echo "Cannot find that alias, try again and make sure that you type it in exactly"
     exit
   fi
-  #remove alias.sh since we have the arrays in memory
   rm $homedir/alias.sh
-  #create a new alias.sh
   alias_initialize
-  #loop through all the aliases and if don't match the one we want to remove add them back to alias.sh
-  #the one that does won't be added back in
-  for loopindex in ${!aliasnames[@]}
-  do
-    #set the name value to the value in aliasnames at the current index
+  for loopindex in "${!aliasnames[@]}"; do
     currentname=${aliasnames[$loopindex]}
-    #check if the current name value does not match the name we want to remove
-    if [ "$currentname" != "$remove_name" ]
-    then
-      #save the values we want to keep
+    if [ "$currentname" != "$remove_name" ]; then
       keepname=${aliasnames[$loopindex]}
       keepdir=${aliasvalues[$loopindex]}
-      #and append them to alias.sh
-      echo "aliasnames+=("$keepname")" >> $homedir/alias.sh
-      echo "aliasvalues+=("$keepdir")" >> $homedir/alias.sh
+      echo "aliasnames+=("$keepname")" >>$homedir/alias.sh
+      echo "aliasvalues+=("$keepdir")" >>$homedir/alias.sh
     fi
   done
 }
-alias_clear()
-{
-  #erase all aliases
-  #make sure we are in the install directory
-  #remove alias.sh
+
+alias_clear() {
   rm $homedir/alias.sh
-  #make a new one
   alias_initialize
 }
-expandPath()
-{
+
+expandPath() {
   x=$1
-  local  __resultvar=$2
+  local __resultvar=$2
   case $x in
-    *"~/"*)
+  *"~/"*)
     contains="found"
     x="${HOME}/${x#"~/"}"
     local __finalx=$x
     ;;
   esac
-  if [ "$contains" != "found" ]
-  then
+  if [ "$contains" != "found" ]; then
     local __finalx=$x
   fi
   eval $__resultvar="'$__finalx'"
 }
-showReadme()
-{
-  nano --softwrap --view ~/.config/easydl/README.md
+
+showREADME() {
+  nano --softwrap --view ~/.config/easydl/read -rME.md
 }
-cutter()
-{
-  #initialize the arrays
+
+cutter() {
   filenames=()
   start_times=()
   end_times=()
   echo -e "${CYAN}Would you like the cuts to favor speed or accuracy?${NC}"
-  read -p '"speed" or "accuracy">' pref
-  #get the path to the original file (colored cyan)
+  read -r -p '"speed" or "accuracy">' pref
   echo -e "${CYAN}Enter full path to orignal file (including filename and extension)${NC}"
-  read -p ">" full_path
+  read -r -p ">" full_path
   echo ""
-  #get only the path to the file
   original_path=$(dirname "$full_path")
-  #get only the filename and extension
   original=$(basename "$full_path")
-  #get the filenames and times to cut
   get_times
-  #perform the cut
   cut
 }
-get_times()
-{
-  #create a variable for the raw input for the filename (able to exit)
+
+get_times() {
   sraw="initial"
   #while the user doesn't input "done" for the filename
-  while [ "$sraw" != "done" ]
-  do
-    #ask the user for the name of the file they want to output to (needs an extension)
+  while [ "$sraw" != "done" ]; do
     echo -e "${CYAN}Enter filename (including extension) or \"done\" to start cutting${NC}"
-    read -p "filename > " sraw
-    #make sure the user didn't input "done"
-    if [ "$sraw" != "done" ]
-    then
-      #add the filename to the filenames array
+    read -r -p "filename > " sraw
+    if [ "$sraw" != "done" ]; then
       filenames+=("$sraw")
-    fi
-    #make sure the user didn't input "done"
-    if [ "$sraw" != "done" ]
-    then
-      #ask for starting time (with cyan base color and green for the word "start")
       echo -e "${CYAN}Enter ${GREEN}start${CYAN} time${NC}"
-      read -p "HH:MM:SS > " raw
+      read -r -p "HH:MM:SS > " raw
       #turn the HH:MM:SS formated time to seconds (it can also accept M:SS and S)
       start=$(echo $raw | awk -F\: '{ for(k=NF;k>0;k--) sum+=($k*(60^(NF-k))); print sum }')
-      #add the start time to the start times array
       start_times+=("$start")
-    fi
-    if [ "$sraw" != "done" ]
-    then
       echo -e "${CYAN}Enter ${RED}end${CYAN} time${NC}"
-      read -p "HH:MM:SS > " raw
-      #turn the HH:MM:SS formated time to seconds (it can also accept M:SS and S)
+      read -r -p "HH:MM:SS > " raw
       end=$(echo $raw | awk -F\: '{ for(k=NF;k>0;k--) sum+=($k*(60^(NF-k))); print sum }')
-      #add the end time to the end times array
       end_times+=("$end")
-      #space out each pass
-      echo ""
+      echo
     fi
   done
 }
-cut()
-{
-  #expand the path on the path to the original file and store the output in the original_path variable $1 = input, $2 = variable name
+
+cut() {
+  # original_path is the name of the output variable
   expandPath "$original_path" "original_path"
-  #move to the directory of the original file
   pushd "$original_path"
-  #cycle through all the entries (filename, start, and end time combos)
-  for index in ${!filenames[@]}
-  do
-    #set the current "filename"
+  for index in "${!filenames[@]}"; do
     filename=${filenames[$index]}
-    #set the current "final_start"
     final_start=${start_times[$index]}
-    #set the current "final_end"
     final_end=${end_times[$index]}
-    #space out the output
-    echo ""
-    #execute the ffmpeg $original = original file name, $final_start = starting time in seconds, $final_end = ending time in seconds, $filename = filename for cut file
-    if [ $pref == "speed" ]
-    then
+    echo
+    #execute ffmpeg $original = original file name, $final_start = starting time in seconds, $final_end = ending time in seconds, $filename = filename for cut file
+    if [ $pref == "speed" ]; then
       ffmpeg -hide_banner -i "$original" -ss "$final_start" -to "$final_end" -c copy "$filename"
     else
       ffmpeg -hide_banner -i "$original" -ss "$final_start" -to "$final_end" -async 1 "$filename"
@@ -554,5 +386,6 @@ cut()
   #reset directory
   popd
 }
+
 #start the program by first analyzing the command line options
-execute_flags $1
+execute_flags "$1"
